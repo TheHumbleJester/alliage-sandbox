@@ -1,6 +1,6 @@
 {
   "name": "alliage-sandbox",
-  "version": "0.0.1.pre",
+  "version": "0.0.1",
   "description": "Sandbox to perform integration tests on an alliage application",
   "main": "index.js",
   "repository": "git@github.com:TheHumbleJester/alliage-sandbox.git",
