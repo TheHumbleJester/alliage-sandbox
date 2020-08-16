@@ -10,6 +10,10 @@ interface Config {
   alliageModules: string[];
 }
 
+export type CommandOptions = {
+  env?: { [name: string]: string };
+};
+
 export interface Params {
   scenarioPath: string;
   projectPath?: string;
@@ -84,7 +88,7 @@ export class Sandbox {
   }
 
   getConfig() {
-    this.throwIfNowInitialized();
+    this.throwIfNotInitialized();
     return this.config;
   }
 
@@ -155,20 +159,20 @@ export class Sandbox {
     fs.remove(this.sandboxPath);
   }
 
-  install(args: string[]) {
-    return this.runCommand(COMMAND.INSTALL, args);
+  install(args: string[], options: CommandOptions = {}) {
+    return this.runCommand(COMMAND.INSTALL, args, options);
   }
 
-  run(args: string[]) {
-    return this.runCommand(COMMAND.RUN, args);
+  run(args: string[], options: CommandOptions = {}) {
+    return this.runCommand(COMMAND.RUN, args, options);
   }
 
-  build(args: string[]) {
-    return this.runCommand(COMMAND.BUILD, args);
+  build(args: string[], options: CommandOptions = {}) {
+    return this.runCommand(COMMAND.BUILD, args, options);
   }
 
-  private runCommand(command: COMMAND, args: string[]) {
-    this.throwIfNowInitialized();
+  private runCommand(command: COMMAND, args: string[], { env = {} }: CommandOptions) {
+    this.throwIfNotInitialized();
     const nodePath = [
       path.resolve(this.sandboxPath, 'linked_modules'),
       ...(process.env.NODE_PATH?.split(':') || []),
@@ -181,6 +185,8 @@ export class Sandbox {
 
     const childProcess = cp.exec(`${this.config.command} ${script} ${command} ${args.join(' ')}`, {
       env: {
+        ...process.env,
+        ...env,
         NODE_PATH: nodePath,
         PATH: systemPath,
       },
@@ -198,7 +204,7 @@ export class Sandbox {
     };
   }
 
-  private throwIfNowInitialized() {
+  private throwIfNotInitialized() {
     if (!this.isInitialized) {
       throw new Error('The sandbox must be initialized by calling the "init()" method');
     }

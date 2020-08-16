@@ -197,6 +197,7 @@ describe('Sandbox', () => {
           )} install test-arg1 test-arg2`,
           {
             env: {
+              ...process.env,
               PATH: `test-path1:test-path2:${path.resolve(sandbox.getPath(), 'node_modules/.bin')}`,
               NODE_PATH: `${path.resolve(
                 sandbox.getPath(),
@@ -242,6 +243,7 @@ describe('Sandbox', () => {
           )} run test-arg1 test-arg2`,
           {
             env: {
+              ...process.env,
               PATH: `test-path1:test-path2:${path.resolve(sandbox.getPath(), 'node_modules/.bin')}`,
               NODE_PATH: `${path.resolve(
                 sandbox.getPath(),
@@ -276,6 +278,7 @@ describe('Sandbox', () => {
           )} build test-arg1 test-arg2`,
           {
             env: {
+              ...process.env,
               PATH: `test-path1:test-path2:${path.resolve(sandbox.getPath(), 'node_modules/.bin')}`,
               NODE_PATH: `${path.resolve(
                 sandbox.getPath(),
@@ -408,6 +411,50 @@ describe('Sandbox', () => {
       });
     });
 
+    describe('#install', () => {
+      it('should allow to define env variables', async () => {
+        const execSpy = jest.spyOn(cp, 'exec').mockImplementation(() => ({} as any));
+
+        sandbox.install(['test-arg1', 'test-arg2'], {
+          env: { DUMMY_ENV_VARIABLE: 'dummy_env_variable' },
+        });
+
+        expect(execSpy).toHaveBeenCalledWith(expect.anything(), {
+          env: {
+            ...process.env,
+            DUMMY_ENV_VARIABLE: 'dummy_env_variable',
+            PATH: path.resolve(sandbox.getPath(), 'node_modules/.bin'),
+            NODE_PATH: path.resolve(sandbox.getPath(), 'linked_modules'),
+          },
+          cwd: sandbox.getPath(),
+        });
+
+        execSpy.mockRestore();
+      });
+    });
+
+    describe('#build', () => {
+      it('should allow to define env variables', async () => {
+        const execSpy = jest.spyOn(cp, 'exec').mockImplementation(() => ({} as any));
+
+        sandbox.build(['test-arg1', 'test-arg2'], {
+          env: { DUMMY_ENV_VARIABLE: 'dummy_env_variable' },
+        });
+
+        expect(execSpy).toHaveBeenCalledWith(expect.anything(), {
+          env: {
+            ...process.env,
+            DUMMY_ENV_VARIABLE: 'dummy_env_variable',
+            PATH: path.resolve(sandbox.getPath(), 'node_modules/.bin'),
+            NODE_PATH: path.resolve(sandbox.getPath(), 'linked_modules'),
+          },
+          cwd: sandbox.getPath(),
+        });
+
+        execSpy.mockRestore();
+      });
+    });
+
     describe('#run', () => {
       it('should handle undefined PATH and NODE_PATH correctly', async () => {
         const execSpy = jest.spyOn(cp, 'exec').mockImplementation(() => ({} as any));
@@ -416,6 +463,27 @@ describe('Sandbox', () => {
 
         expect(execSpy).toHaveBeenCalledWith(expect.anything(), {
           env: {
+            ...process.env,
+            PATH: path.resolve(sandbox.getPath(), 'node_modules/.bin'),
+            NODE_PATH: path.resolve(sandbox.getPath(), 'linked_modules'),
+          },
+          cwd: sandbox.getPath(),
+        });
+
+        execSpy.mockRestore();
+      });
+
+      it('should allow to define env variables', async () => {
+        const execSpy = jest.spyOn(cp, 'exec').mockImplementation(() => ({} as any));
+
+        sandbox.run(['test-arg1', 'test-arg2'], {
+          env: { DUMMY_ENV_VARIABLE: 'dummy_env_variable' },
+        });
+
+        expect(execSpy).toHaveBeenCalledWith(expect.anything(), {
+          env: {
+            ...process.env,
+            DUMMY_ENV_VARIABLE: 'dummy_env_variable',
             PATH: path.resolve(sandbox.getPath(), 'node_modules/.bin'),
             NODE_PATH: path.resolve(sandbox.getPath(), 'linked_modules'),
           },
